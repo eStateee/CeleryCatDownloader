@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  web:
+    restart: always
+    build: './Cats'
+    entrypoint: /usr/src/app/entrypoint.sh
+    expose:
+      - 8000
+    volumes:
+      - ./Cats/:/usr/src/app/
+      - ./Cats/cats_img:/usr/src/app/cats_img
+  broker:
+    restart: always
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./Cats/cats_img:/usr/src/app/cats_img
+  celery:
+    restart: always
+    build: ./Cats
+    entrypoint: /usr/src/app/celery-entrypoint.sh
+    volumes:
+      - ./Cats/cats_img:/usr/src/app/cats_img
+  nginx:
+    container_name: "nginx"
+    build: ./nginx
+    ports:
+      - 8000:80
+    depends_on:
+      - web
+    volumes:
+      - ./Cats/cats_img:/usr/src/app/cats_img
